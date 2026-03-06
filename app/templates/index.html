@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Приложение аукциона — Панель управления</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔨 Приложение аукциона</h1>
+            <p>Цифровая панель управления: участники, лоты, аукционы и аналитика</p>
+            {% if user %}
+            <div class="user-info">
+                <span class="user-name">👤 {{ user.name }}</span>
+                <span class="user-role">{{ 'Администратор' if user.role == 'admin' else 'Продавец' }}</span>
+                <a href="/logout" class="logout-btn">Выйти</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('bidders')">👥 Участники аукциона</button>
+            {% if user and user.role == 'admin' %}
+            <button class="nav-tab" onclick="showTab('sellers')">🏢 Продавцы</button>
+            {% endif %}
+            <button class="nav-tab" onclick="showTab('lots')">📦 Лоты</button>
+            <button class="nav-tab" onclick="showTab('auctions')">🕒 Аукционы</button>
+            <button class="nav-tab" onclick="showTab('analytics')">📊 Аналитика</button>
+        </div>
+
+        <div id="bidders" class="tab-content active">
+            <h2>👥 Участники аукциона</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Добавить участника</h3>
+                    <form id="bidderForm">
+                        <div class="form-group">
+                            <label for="bidderName">ФИО участника:</label>
+                            <input type="text" id="bidderName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bidderEmail">Email участника:</label>
+                            <input type="email" id="bidderEmail" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bidderPhone" class="optional">Телефон (по желанию):</label>
+                            <input type="text" id="bidderPhone" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="bidderAddress" class="optional">Адрес или город:</label>
+                            <textarea id="bidderAddress" class="form-control" rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Зарегистрировать участника</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>Реестр участников аукциона</h3>
+                    <div id="biddersList">
+                        <div class="loading"><div class="spinner"></div><p>Загрузка...</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if user and user.role == 'admin' %}
+        <div id="sellers" class="tab-content">
+            <h2>🏢 Продавцы и организаторы</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Добавить продавца</h3>
+                    <form id="sellerForm">
+                        <div class="form-group">
+                            <label for="sellerName">Название продавца / организации:</label>
+                            <input type="text" id="sellerName" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Добавить продавца</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>Список продавцов</h3>
+                    <div id="sellersList">
+                        <div class="loading"><div class="spinner"></div><p>Загрузка...</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div id="lots" class="tab-content">
+            <h2>📦 Лоты</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Добавить лот</h3>
+                    <form id="lotForm">
+                        <div class="form-group">
+                            <label for="lotName">Название лота:</label>
+                            <input type="text" id="lotName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lotPrice">Стартовая цена:</label>
+                            <input type="text" id="lotPrice" class="form-control" placeholder="например 50 000 ₽" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lotDescription">Описание:</label>
+                            <textarea id="lotDescription" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="lotCategory">Категория:</label>
+                            <input type="text" id="lotCategory" class="form-control" placeholder="Живопись, Антиквариат..." required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Добавить лот</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>Список лотов</h3>
+                    <div id="lotsList">
+                        <div class="loading"><div class="spinner"></div><p>Загрузка...</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="auctions" class="tab-content">
+            <h2>🕒 Аукционы</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Запланировать аукцион</h3>
+                    <form id="auctionForm">
+                        <div class="form-group">
+                            <label for="auctionDate">Дата аукциона:</label>
+                            <input type="date" id="auctionDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="auctionLocation">Площадка проведения / формат:</label>
+                            <input type="text" id="auctionLocation" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="auctionLot">Лот:</label>
+                            <select id="auctionLot" class="form-control" required>
+                                <option value="">Выберите лот</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="auctionSeller">Продавец:</label>
+                            <select id="auctionSeller" class="form-control" required>
+                                <option value="">Выберите продавца</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="auctionNotes">Примечания к аукциону:</label>
+                            <textarea id="auctionNotes" class="form-control" rows="2" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="auctionStatus">Статус аукциона:</label>
+                            <select id="auctionStatus" class="form-control" required>
+                                <option value="active">Активный</option>
+                                <option value="completed">Завершён</option>
+                                <option value="cancelled">Отменён</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="auctionFinalPrice" class="optional">Итоговая цена / документ:</label>
+                            <input type="text" id="auctionFinalPrice" class="form-control" placeholder="если аукцион завершён">
+                        </div>
+                        <div class="form-group">
+                            <label for="auctionWinner" class="optional">Победитель (по желанию):</label>
+                            <select id="auctionWinner" class="form-control">
+                                <option value="">—</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Создать аукцион</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>Список аукционов</h3>
+                    <div id="auctionsList">
+                        <div class="loading"><div class="spinner"></div><p>Загрузка...</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="analytics" class="tab-content">
+            <h2>📊 Аналитика</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>📈 Общая статистика по участникам, лотам и аукционам</h3>
+                    <div id="statistics">
+                        <div class="loading"><div class="spinner"></div><p>Загрузка...</p></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🏷️ Популярные категории лотов</h3>
+                    <div id="popularCategories">
+                        <div class="loading"><div class="spinner"></div><p>Загрузка...</p></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>📄 Самые востребованные лоты</h3>
+                    <div id="popularLots">
+                        <div class="loading"><div class="spinner"></div><p>Загрузка...</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid">
+                <div class="card">
+                    <h3>Аукционов по дате</h3>
+                    <form id="auctionsByDateForm">
+                        <div class="form-group">
+                            <label for="analyticsDate">Дата:</label>
+                            <input type="date" id="analyticsDate" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-info">Показать</button>
+                    </form>
+                    <div id="auctionsByDateResult" class="result-box" style="display: none;">
+                        <div class="result-number" id="auctionsCount">0</div>
+                        <div class="result-text">аукционов в выбранный день</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Лотов по категории</h3>
+                    <form id="lotsByCategoryForm">
+                        <div class="form-group">
+                            <label for="analyticsCategory">Категория:</label>
+                            <input type="text" id="analyticsCategory" class="form-control" placeholder="Например: Живопись" required>
+                        </div>
+                        <button type="submit" class="btn btn-info">Показать</button>
+                    </form>
+                    <div id="lotsByCategoryResult" class="result-box" style="display: none;">
+                        <div class="result-number" id="lotsCount">0</div>
+                        <div class="result-text">лотов в категории</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Детали лота</h3>
+                    <form id="lotDetailsForm">
+                        <div class="form-group">
+                            <label for="analyticsLot">Лот:</label>
+                            <select id="analyticsLot" class="form-control" required>
+                                <option value="">Выберите лот</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-warning">Показать описание</button>
+                    </form>
+                    <div id="lotDetailsResult" class="result-box" style="display: none;">
+                        <h4 id="lotNameResult"></h4>
+                        <p id="lotDetailsText"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

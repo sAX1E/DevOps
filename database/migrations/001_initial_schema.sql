@@ -1,0 +1,51 @@
+-- Аукцион: начальная схема (таблицы создаются также через Flask-SQLAlchemy db.create_all())
+-- База данных: data/auction.db
+
+CREATE TABLE IF NOT EXISTS user (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	username VARCHAR(80) UNIQUE NOT NULL,
+	password_hash VARCHAR(120) NOT NULL,
+	role VARCHAR(20) NOT NULL,
+	name VARCHAR(100) NOT NULL,
+	is_active BOOLEAN DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS bidder (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	name VARCHAR(100) NOT NULL,
+	email VARCHAR(120) NOT NULL,
+	phone VARCHAR(20),
+	address VARCHAR(200)
+);
+
+CREATE TABLE IF NOT EXISTS seller (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS lot (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	name VARCHAR(100) UNIQUE NOT NULL,
+	starting_price VARCHAR(50) NOT NULL,
+	description TEXT NOT NULL,
+	category VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS auction (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	date DATE NOT NULL,
+	location VARCHAR(200) NOT NULL,
+	notes TEXT NOT NULL,
+	status VARCHAR(50) NOT NULL,
+	final_price VARCHAR(50),
+	lot_id INTEGER NOT NULL REFERENCES lot(id),
+	seller_id INTEGER NOT NULL REFERENCES seller(id),
+	winner_bidder_id INTEGER REFERENCES bidder(id)
+);
+
+CREATE TABLE IF NOT EXISTS bid (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	auction_id INTEGER NOT NULL REFERENCES auction(id),
+	bidder_id INTEGER NOT NULL REFERENCES bidder(id),
+	amount VARCHAR(50) NOT NULL
+);

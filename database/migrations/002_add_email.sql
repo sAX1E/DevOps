@@ -1,0 +1,2 @@
+-- Аукцион: добавление поля email в user (если потребуется в будущем)
+-- ALTER TABLE user ADD COLUMN email TEXT UNIQUE;
