@@ -7,8 +7,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install pytest
 
 COPY app/*.py ./
-COPY app/templates/ ./templates/
-COPY app/static/ ./static/
+COPY templates/ ./templates/
+COPY static/ ./static/
 
 RUN mkdir -p data
 
