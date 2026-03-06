@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv
+myenv/
+virtualenv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.log
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+instance/*.db
+
+# TeamCity
+teamcity/
+teamcity-data/
+.teamcity/
+
+# OS
+.DS_Store
+Thumbs.db
